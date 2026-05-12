@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { db } from "@/lib/db";
 import { useRouter } from 'next/navigation';
-import { Upload, Loader2, ArrowLeft, Link as LinkIcon, Globe, FileText } from 'lucide-react';
+import { Upload, Loader2, ArrowLeft, Link as LinkIcon, Globe, FileText, User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function UploadPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [author, setAuthor] = useState('');
   const [category, setCategory] = useState('Blog');
   const [previewUrl, setPreviewUrl] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
@@ -31,7 +32,7 @@ export default function UploadPage() {
           { 
             name: title,
             desc: description,
-            author: user.email,
+            author: author,
             category, 
             preview_url: previewUrl,
             repo_url: repoUrl,
@@ -140,6 +141,21 @@ export default function UploadPage() {
                   onChange={(e) => setRepoUrl(e.target.value)}
                 />
               </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-zinc-400">Author</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
+              <input
+                type="url"
+                required
+                placeholder="Nama author"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-md py-3 pl-12 pr-4 text-white outline-none focus:border-zinc-400 transition-all placeholder:text-zinc-700"
+                value={repoUrl}
+                onChange={(e) => setRepoUrl(e.target.value)}
+              />
             </div>
           </div>
 
