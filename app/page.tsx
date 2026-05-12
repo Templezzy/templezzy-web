@@ -1,65 +1,115 @@
-import Image from "next/image";
+import { db } from "@/lib/db";
+import { Eye, ArrowDownToLine } from "lucide-react";
+import Navbar from "@/app/components/Navbar";
+import SearchBar from "@/app/components/handleSearch";
+import { Suspense } from "react";
+import Link from "next/link";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; category?: string }>;
+}) {
+  const { search, category } = await searchParams;
+
+  let query = db.from("template").select("*");
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
+
+  if (category) {
+    query = query.eq("category", category);
+  }
+
+  const { data } = await query;
+  if (!data) return null;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen flex flex-col justify-center items-center p-4 md:p-10">
+      <div className="flex justify-between w-full mb-24">
+        <div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div>
+          <Link href="/uploads" className="text-zinc-400 hover:text-white transition text-sm">
+            Upload Your Templates
+          </Link>
+        </div>
+      </div>
+      <section className="flex flex-col items-center text-center mt-18 px-4">
+        <h1 className="text-5xl md:text-8xl mb-2 font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">
+          Templezzy
+        </h1>
+        <h2 className="text-2xl md:text-4xl mb-6 font-bold text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">
+          Build Eazy With Templezzy
+        </h2>
+        <p className="max-w-lg text-sm md:text-base text-zinc-400">
+          Discover a curated collection of 25+ high-quality templates designed
+          to speed up your workflow and elevate your next big project.
+        </p>
+      </section>
+
+      <Suspense fallback={<div className="mt-24 h-[74px] w-full max-w-lg" />}>
+        <SearchBar />
+      </Suspense>
+
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-20 md:mt-35 w-full max-w-7xl">
+        {data?.map((datas) => (
+          <div
+            key={datas.id}
+            className="bg-zinc-950 border border-zinc-900 p-5 w-full md:w-120 mx-auto flex flex-col h-full"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <img
+              src={
+                datas.preview_url ||
+                "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png"
+              }
+              alt={datas.name}
+              width={240}
+              height={720}
+              className="object-cover w-full aspect-video md:aspect-auto"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <p className="text-2xl md:text-3xl mb-3 font-medium mt-2 text-white truncate">
+              {datas.name}
+            </p>
+            
+          
+            <div className="flex-grow">
+              <p className="text-zinc-400 text-sm md:text-base line-clamp-2">
+                {datas.desc}
+              </p>
+            </div>
+      
+            <p className="text-zinc-500 text-xs md:text-sm mt-3">
+              Author : {datas.author}
+            </p>
+            
+            <div className="flex items-center gap-4 flex-wrap mt-auto">
+              <button className="w-fit mt-3 text-sm underline">
+                <a
+                  href={datas.preview_url || ""}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white flex items-center gap-2 font-medium"
+                >
+                  Preview <Eye size={18} className="inline-block" />
+                </a>
+              </button>
+              <button className="w-fit mt-3 text-sm md:text-md underline">
+                <a
+                  href={datas.repo_url || ""}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white flex items-center gap-2 font-medium"
+                >
+                  Downloads{" "}
+                  <ArrowDownToLine size={18} className="inline-block" />
+                </a>
+              </button>
+            </div>
+          </div>
+        ))}
+      </section>
+    </main>
   );
 }
